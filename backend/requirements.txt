@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydub
+google-cloud-storage
+google-cloud-pubsub
+google-cloud-speech

@@ -1,0 +1,42 @@
+steps:
+  # Build the backend image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/backend:$SHORT_SHA', '-f', 'backend/Dockerfile', './backend' ]
+  # Deploy the backend to Cloud Run (adjust service name and region)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      [
+        "gcloud", "run", "deploy", "audio-backend",
+        "--image", "gcr.io/$PROJECT_ID/backend:$SHORT_SHA",
+        "--platform", "managed",
+        "--region", "us-central1",
+        "--allow-unauthenticated"
+      ]
+  # Build the worker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/worker:$SHORT_SHA', '-f', 'backend/WorkerDockerfile', './backend' ]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      [
+        "gcloud", "run", "deploy", "audio-worker",
+        "--image", "gcr.io/$PROJECT_ID/worker:$SHORT_SHA",
+        "--platform", "managed",
+        "--region", "us-central1",
+        "--no-allow-unauthenticated"
+      ]
+  # Build the frontend image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA', '-f', 'frontend/Dockerfile', './frontend' ]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args:
+      [
+        "gcloud", "run", "deploy", "audio-frontend",
+        "--image", "gcr.io/$PROJECT_ID/frontend:$SHORT_SHA",
+        "--platform", "managed",
+        "--region", "us-central1",
+        "--allow-unauthenticated"
+      ]
+images:
+  - 'gcr.io/$PROJECT_ID/backend:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/worker:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/frontend:$SHORT_SHA'
