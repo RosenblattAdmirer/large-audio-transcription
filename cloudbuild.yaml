@@ -1,11 +1,11 @@
 steps:
+  # Debug: Print the short SHA to verify substitution
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - 'echo "The short SHA is: $SHORT_SHA"'
-  # ... rest of your steps ...
-
+      
   # Build the backend image
   - name: 'gcr.io/cloud-builders/docker'
     args: [
@@ -14,15 +14,22 @@ steps:
       '-f', 'backend/Dockerfile', 
       './backend'
     ]
+  # Explicitly push the backend image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-central1-docker.pkg.dev/$PROJECT_ID/my-app/backend:$SHORT_SHA'
+    ]
   # Deploy the backend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args: [
-      "gcloud", "run", "deploy", "audio-backend",
-      "--image", "us-central1-docker.pkg.dev/$PROJECT_ID/my-app/backend:$SHORT_SHA",
-      "--platform", "managed",
-      "--region", "us-central1",
-      "--allow-unauthenticated"
+      'gcloud', 'run', 'deploy', 'audio-backend',
+      '--image', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app/backend:$SHORT_SHA',
+      '--platform', 'managed',
+      '--region', 'us-central1',
+      '--allow-unauthenticated'
     ]
+    
   # Build the worker image (using WorkerDockerfile)
   - name: 'gcr.io/cloud-builders/docker'
     args: [
@@ -31,15 +38,22 @@ steps:
       '-f', 'backend/WorkerDockerfile', 
       './backend'
     ]
+  # Explicitly push the worker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-central1-docker.pkg.dev/$PROJECT_ID/my-app/worker:$SHORT_SHA'
+    ]
   # Deploy the worker service to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args: [
-      "gcloud", "run", "deploy", "audio-worker",
-      "--image", "us-central1-docker.pkg.dev/$PROJECT_ID/my-app/worker:$SHORT_SHA",
-      "--platform", "managed",
-      "--region", "us-central1",
-      "--no-allow-unauthenticated"
+      'gcloud', 'run', 'deploy', 'audio-worker',
+      '--image', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app/worker:$SHORT_SHA',
+      '--platform', 'managed',
+      '--region', 'us-central1',
+      '--no-allow-unauthenticated'
     ]
+    
   # Build the frontend image
   - name: 'gcr.io/cloud-builders/docker'
     args: [
@@ -48,14 +62,20 @@ steps:
       '-f', 'frontend/Dockerfile', 
       './frontend'
     ]
+  # Explicitly push the frontend image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-central1-docker.pkg.dev/$PROJECT_ID/my-app/frontend:$SHORT_SHA'
+    ]
   # Deploy the frontend service to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args: [
-      "gcloud", "run", "deploy", "audio-frontend",
-      "--image", "us-central1-docker.pkg.dev/$PROJECT_ID/my-app/frontend:$SHORT_SHA",
-      "--platform", "managed",
-      "--region", "us-central1",
-      "--allow-unauthenticated"
+      'gcloud', 'run', 'deploy', 'audio-frontend',
+      '--image', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-app/frontend:$SHORT_SHA',
+      '--platform', 'managed',
+      '--region', 'us-central1',
+      '--allow-unauthenticated'
     ]
 
 images:
