@@ -1,4 +1,11 @@
 steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - 'echo "The short SHA is: $SHORT_SHA"'
+  # ... rest of your steps ...
+
   # Build the backend image
   - name: 'gcr.io/cloud-builders/docker'
     args: [
